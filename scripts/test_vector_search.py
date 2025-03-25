@@ -1,22 +1,20 @@
-# # test_vector_search.py
-# from pymongo import MongoClient
+# import os
+# from dotenv import load_dotenv
+# from pymongo import MongoClient, ASCENDING
 # from langchain_mongodb.vectorstores import MongoDBAtlasVectorSearch
 # from langchain_openai import OpenAIEmbeddings
 
-# # MongoDB connection
-# MONGODB_URI = (
-#     "mongodb+srv://"
-# )
+# load_dotenv()
+
+# MONGODB_URI = os.getenv("MONGODB_URI")
+# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 # mongo_client = MongoClient(MONGODB_URI)
 # db = mongo_client.secure_rag
 # collection = db.documents
+# embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
 
-# # Initialize embeddings
-# embeddings = OpenAIEmbeddings(
-#     openai_api_key="sk-proj-xxxx"
-# )  # Update with your API key
-
-# # Initialize vector store
+# ========> Testing Vector Search <========
 # vector_store = MongoDBAtlasVectorSearch(
 #     collection=collection,
 #     embedding=embeddings,
@@ -25,87 +23,69 @@
 #     embedding_key="vector_embedding",
 # )
 
-# # Test vector search
 # results = vector_store.similarity_search(
 #     query="Tell me about the budget",
 #     k=4,
 #     pre_filter={
-#         "document_id": {"$in": ["budget_2024_a2c7ca81", "revenue_forecast_fdabf74e"]}
+#         "document_id": {
+#             "$in": [
+#                 "eoy_marketing_c891085e",
+#                 "product_roadmap_ddd85fe3",
+#                 "marketing_plan_307c8659",
+#             ]
+#         }
 #     },
 # )
-
-# # Print results
 # print("Search Results:")
 # for doc in results:
 #     print(f"Document ID: {doc.metadata.get('document_id')}")
 #     print(f"Content Snippet: {doc.page_content[:200]}...")
 #     print("---")
 
+# =====> End of Testing Vector Search <=======
+
 # <====== Verify embeddings <==========
-# from pymongo import MongoClient
 
-# client = MongoClient(
-#     "mongodb+srv://taofiqaiyelabegan45:YIqBRTAM2tTxtwFB@cluster0.ki6xb.mongodb.net/"
-# )
-# db = client.secure_rag
-# collection = db.documents
-
-# doc = collection.find_one({"document_id": "budget_2024_a2c7ca81"})
+# doc = collection.find_one({"document_id": "budget_2024_c34ced42"})
 # print("doc", doc)
 # print(doc.get("vector_embedding"))
 
+# <======= End of Verify embeddings <=======
+
 
 # <=======   generate_embeddings.py <=======
-from pymongo import MongoClient
-from langchain_openai import OpenAIEmbeddings
 
-# MongoDB connection
-client = MongoClient("mongodb+srv:xxxxx")
-db = client.secure_rag
-collection = db.documents
+# document_ids = [
+#     "eoy_marketing_c891085e",
+#     "product_roadmap_ddd85fe3",
+#     "marketing_plan_307c8659",
+# ]
+# documents = collection.find({"document_id": {"$in": document_ids}})
 
-# Initialize embeddings
-embeddings = OpenAIEmbeddings(
-    openai_api_key="sk-proj-pLasv...."
-)  # Update with your API key
+# for doc in documents:
+#     content = doc["content"]
+#     vector_embedding = embeddings.embed_query(content)
+#     collection.update_one(
+#         {"_id": doc["_id"]}, {"$set": {"vector_embedding": vector_embedding}}
+#     )
+#     print(f"Updated embedding for document_id: {doc['document_id']}")
 
-# Fetch documents
-document_ids = ["budget_2024_a2c7ca81", "revenue_forecast_fdabf74e"]
-documents = collection.find({"document_id": {"$in": document_ids}})
-
-# Generate and update embeddings
-for doc in documents:
-    content = doc["content"]
-    vector_embedding = embeddings.embed_query(content)  # Generate embedding
-    collection.update_one(
-        {"_id": doc["_id"]}, {"$set": {"vector_embedding": vector_embedding}}
-    )
-    print(f"Updated embedding for document_id: {doc['document_id']}")
-
-# Verify the update
-for doc_id in document_ids:
-    doc = collection.find_one({"document_id": doc_id})
-    print(
-        f"vector_embedding for {doc_id}: {doc.get('vector_embedding')[:5]}... (first 5 values)"
-    )
+# for doc_id in document_ids:
+#     doc = collection.find_one({"document_id": doc_id})
+#     print(
+#         f"vector_embedding for {doc_id}: {doc.get('vector_embedding')[:5]}... (first 5 values)"
+#     )
 
 #  ======> End of generate_embeddings.py <=======
 
 # <======== Run Index =======>
-# import os
-# from pymongo import MongoClient, ASCENDING
 
-# # Retrieve MongoDB URI from environment
-# MONGODB_URI = os.environ.get("MONGODB_URI")
-# if not MONGODB_URI:
-#     raise ValueError("MONGODB_URI environment variable is not set")
+# Retrieve MongoDB URI from environment
 
-# # Initialize MongoDB client
 # mongo_client = MongoClient(MONGODB_URI)
 # db = mongo_client.secure_rag
 # collection = db.documents
 
-# # Create the index on document_id
 # try:
 #     collection.create_index(
 #         [("document_id", ASCENDING)], name="document_id_index", unique=True
@@ -114,5 +94,6 @@ for doc_id in document_ids:
 # except Exception as e:
 #     print(f"Error creating index: {str(e)}")
 
-# # Close the MongoDB connection
 # mongo_client.close()
+
+# <======== End of Run Index =======>
