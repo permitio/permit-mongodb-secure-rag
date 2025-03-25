@@ -1,4 +1,3 @@
-# app/utils.py
 import logging
 from typing import List, Dict, Any
 from langchain_core.documents import Document

@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from pydantic import BaseModel, Field
 
 
@@ -7,9 +7,6 @@ class QueryRequest(BaseModel):
 
     query: str = Field(..., description="The user's query")
     user_id: str = Field(..., description="User ID for permission checking")
-    # department: str = Field(
-    #     ..., description="User's department (marketing, engineering, finance)"
-    # )
 
 
 class QueryResponse(BaseModel):

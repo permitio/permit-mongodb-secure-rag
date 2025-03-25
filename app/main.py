@@ -115,95 +115,6 @@ async def health_check():
     }
 
 
-# @app.post("/query", response_model=QueryResponse)
-# async def query(request: QueryRequest):
-#     """
-#     Process a RAG query with permission-based document filtering.
-
-#     The query will only return documents that the user has permission to access
-#     based on their department and the document's department and confidentiality.
-#     """
-#     try:
-#         user = {
-#             "key": request.user_id,
-#         }
-
-#         retriever = await PermitSelfQueryRetriever.from_permit_client(
-#             permit_client=permit_client,
-#             user=user,
-#             resource_type="document",
-#             action="read",
-#             llm=llm,
-#             vectorstore=vector_store,
-#             enable_limit=True,
-#         )
-
-#         print("😮‍💨 Retrieved Retriever", retriever)
-
-#         rag_chain = create_rag_chain(retriever)
-
-#         print("🥶 Retrieved RAG Chain", rag_chain)
-
-#         answer = await rag_chain.ainvoke(request.query)
-
-#         docs = await retriever.invoke(request.query)
-
-
-#         if answer.strip() == "I don't have enough information to answer this question.":
-#             allowed_ids = (
-#                 retriever._allowed_ids if hasattr(retriever, "_allowed_ids") else []
-#             )
-#             answer = f"No documents match your query due to permission restrictions. You only have access to documents: {allowed_ids}."
-#             logger.warning(
-#                 "Retrieved documents are irrelevant to the query due to permissions"
-#             )
-
-#         sources = []
-#         for doc in docs:
-#             if not isinstance(doc.metadata, dict):
-#                 logger.error(
-#                     f"Unexpected metadata type: {type(doc.metadata)} for doc: {doc}"
-#                 )
-#                 continue
-#             print("🤡 Doc metadata", doc.metadata)
-#             metadata = doc.metadata.get("metadata", {})
-#             source = {
-#                 "document_id": doc.metadata.get("document_id", "unknown"),
-#                 "filename": doc.metadata.get("filename", "unknown"),
-#                 # "department": doc.metadata.get("metadata", {}).get(
-#                 #     "department", "unknown"
-#                 # ),
-#                 "department": metadata.get("department", "unknown"),
-#                 "author": metadata.get("author", "unknown"),
-#                 # "author": doc.metadata.get("metadata", {}).get("author", "unknown"),
-#                 # "confidential": doc.metadata.get("metadata", {}).get(
-#                 #     "confidential", False
-#                 # ),
-#                 "confidential": metadata.get("confidential", False),
-#                 "snippet": (
-#                     doc.page_content[:200] + "..."
-#                     if len(doc.page_content) > 200
-#                     else doc.page_content
-#                 ),
-#             }
-#             sources.append(source)
-#         if not docs:
-#             logger.warning("No documents found for the query")
-#         response = {"answer": str(answer), "sources": sources}
-#         print(f"🔥 Final Response: {response}")
-
-#         if not isinstance(response, dict):
-#             logger.error(f"Response is not a dictionary: {response}")
-#             return {"answer": "Error: Failed to construct response", "sources": []}
-#         return response
-
-#     except Exception as e:
-#         logger.error(f"Error processing query: {str(e)}")
-#         raise HTTPException(status_code=500, detail=f"Error processing query: {str(e)}")
-#     finally:
-#         logger.info("Endpoint execution completed")
-
-
 @app.post("/query", response_model=QueryResponse)
 async def query(request: QueryRequest):
     """
@@ -227,11 +138,7 @@ async def query(request: QueryRequest):
             enable_limit=True,
         )
 
-        print("😮‍💨 Retrieved Retriever", retriever)
-
         rag_chain = create_rag_chain(retriever)
-
-        print("🥶 Retrieved RAG Chain", rag_chain)
 
         answer = await rag_chain.ainvoke(request.query)
 
@@ -256,7 +163,6 @@ async def query(request: QueryRequest):
                         f"Unexpected metadata type: {type(doc.metadata)} for doc: {doc}"
                     )
                     continue
-                print("🤡 Doc metadata", doc.metadata)
                 metadata = doc.metadata.get("metadata", {})
                 source = {
                     "document_id": doc.metadata.get("document_id", "unknown"),
@@ -275,7 +181,6 @@ async def query(request: QueryRequest):
         if not docs:
             logger.warning("No documents found for the query")
         response = {"answer": str(answer), "sources": sources}
-        print(f"🔥 Final Response: {response}")
 
         if not isinstance(response, dict):
             logger.error(f"Response is not a dictionary: {response}")
