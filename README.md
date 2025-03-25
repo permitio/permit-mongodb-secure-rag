@@ -45,7 +45,6 @@ The following diagram illustrates how the components interact:
 
 ![image](https://github.com/user-attachments/assets/f9ebdf92-d70f-45a2-9e47-376713803d25)
 
-
 ## Architecture Components
 
 - **File-Watcher**: Monitors the docs directory and syncs files to MongoDB.
@@ -98,6 +97,10 @@ Before setting up the project, ensure you have the following:
     {
       "type": "filter",
       "path": "metadata.department"
+    },
+    {
+      "type": "filter",
+      "path": "document_id"
     }
   ]
 }
