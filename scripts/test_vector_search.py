@@ -56,40 +56,40 @@
 
 
 # <=======   generate_embeddings.py <=======
-# from pymongo import MongoClient
-# from langchain_openai import OpenAIEmbeddings
+from pymongo import MongoClient
+from langchain_openai import OpenAIEmbeddings
 
-# # MongoDB connection
-# client = MongoClient(
-#     "mongodb+srv://taofiqaiyelabegan45:YIqBRTAM2tTxtwFB@cluster0.ki6xb.mongodb.net/"
-# )
-# db = client.secure_rag
-# collection = db.documents
+# MongoDB connection
+client = MongoClient("mongodb+srv:xxxxx")
+db = client.secure_rag
+collection = db.documents
 
-# # Initialize embeddings
-# embeddings = OpenAIEmbeddings(
-#     openai_api_key="sk-proj-pLasv...."
-# )  # Update with your API key
+# Initialize embeddings
+embeddings = OpenAIEmbeddings(
+    openai_api_key="sk-proj-pLasv...."
+)  # Update with your API key
 
-# # Fetch documents
-# document_ids = ["budget_2024_a2c7ca81", "revenue_forecast_fdabf74e"]
-# documents = collection.find({"document_id": {"$in": document_ids}})
+# Fetch documents
+document_ids = ["budget_2024_a2c7ca81", "revenue_forecast_fdabf74e"]
+documents = collection.find({"document_id": {"$in": document_ids}})
 
-# # Generate and update embeddings
-# for doc in documents:
-#     content = doc["content"]
-#     vector_embedding = embeddings.embed_query(content)  # Generate embedding
-#     collection.update_one(
-#         {"_id": doc["_id"]}, {"$set": {"vector_embedding": vector_embedding}}
-#     )
-#     print(f"Updated embedding for document_id: {doc['document_id']}")
+# Generate and update embeddings
+for doc in documents:
+    content = doc["content"]
+    vector_embedding = embeddings.embed_query(content)  # Generate embedding
+    collection.update_one(
+        {"_id": doc["_id"]}, {"$set": {"vector_embedding": vector_embedding}}
+    )
+    print(f"Updated embedding for document_id: {doc['document_id']}")
 
-# # Verify the update
-# for doc_id in document_ids:
-#     doc = collection.find_one({"document_id": doc_id})
-#     print(
-#         f"vector_embedding for {doc_id}: {doc.get('vector_embedding')[:5]}... (first 5 values)"
-#     )
+# Verify the update
+for doc_id in document_ids:
+    doc = collection.find_one({"document_id": doc_id})
+    print(
+        f"vector_embedding for {doc_id}: {doc.get('vector_embedding')[:5]}... (first 5 values)"
+    )
+
+#  ======> End of generate_embeddings.py <=======
 
 # <======== Run Index =======>
 # import os
