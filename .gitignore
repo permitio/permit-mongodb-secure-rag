@@ -20,6 +20,3 @@ __pycache__/
 # Sensitive data
 *.pem
 *.key
-
-# Data directories
-docs/
