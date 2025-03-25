@@ -43,20 +43,19 @@ Secure RAG combines Retrieval-Augmented Generation with Role-Based Access Contro
 
 The following diagram illustrates how the components interact:
 
-+-------------------+ +-------------------+ +-------------------+
-| | | | | |
-| File-Watcher |------>| MongoDB Atlas |<------| LangChain App |
-| (Syncs Docs) | | (Stores Docs & | | (Secure RAG) |
-| | | Embeddings) | | |
-+-------------------+ +-------------------+ +-------------------+
-| ^ |
-v | v
-+-------------------+ | +-------------------+
-| | | | |
-| Permit.io |---------------|------------------| OpenAI API |
-| (ReBAC Policies) | | | (Generates Answers)|
-| | | | |
-+-------------------+ | +-------------------+
+
+flowchart TD
+    FW["File-Watcher\n(Syncs Docs)"] --> |Syncs documents| MA["MongoDB Atlas\n(Stores Docs &\nEmbeddings)"]
+    MA <--> |Retrieves documents| LA["LangChain App\n(Secure RAG)"]
+    LA --> |Generates answers| OA["OpenAI API\n(Generates Answers)"]
+    FW --> |Document metadata| PI["Permit.io\n(ReBAC Policies)"]
+    PI --> |Permission check| LA
+    MA --> |Vector search| LA
+
+    classDef component fill:#2d333b,stroke:#8b949e,stroke-width:2px,color:white,rx:5px,ry:5px
+    class FW,MA,LA,OA,PI component
+
+    
 
 ## Architecture Components
 
