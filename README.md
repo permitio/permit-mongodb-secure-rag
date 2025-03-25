@@ -43,7 +43,8 @@ Secure RAG combines Retrieval-Augmented Generation with Role-Based Access Contro
 
 The following diagram illustrates how the components interact:
 
-![image](https://github.com/user-attachments/assets/4bf0f315-9b5e-47e4-be58-491684f214a4)
+![image](https://github.com/user-attachments/assets/f9ebdf92-d70f-45a2-9e47-376713803d25)
+
 
 ## Architecture Components
 
