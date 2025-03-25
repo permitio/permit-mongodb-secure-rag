@@ -1,0 +1,68 @@
+services:
+  permit-pdp:
+    image: permitio/pdp-v2:latest
+    container_name: permit-pdp
+    ports:
+      - "7766:7000"
+    environment:
+      - PDP_API_KEY=${PERMIT_API_KEY}
+      - PDP_DEBUG=true
+    restart: unless-stopped
+    networks:
+      - secure-rag-network
+
+  file-watcher:
+    build:
+      context: .
+      dockerfile: Dockerfile.watcher
+    container_name: file-watcher
+    volumes:
+      - ./docs:/app/docs
+      - ./watcher:/app/watcher
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - PERMIT_PDP_URL=http://permit-pdp:7000
+      - PERMIT_API_KEY=${PERMIT_API_KEY}
+    depends_on:
+      - permit-pdp
+    restart: unless-stopped
+    networks:
+      - secure-rag-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import os; exit(0 if os.path.exists('/app/sync_complete') else 1)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  langchain-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: langchain-app
+    volumes:
+      - ./docs:/app/docs
+      - ./app:/app/app
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - PERMIT_PDP_URL=http://permit-pdp:7000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PERMIT_API_KEY=${PERMIT_API_KEY}
+    depends_on:
+      file-watcher:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - secure-rag-network
+    command: sh -c "sleep 5 && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+networks:
+  secure-rag-network:
+    driver: bridge

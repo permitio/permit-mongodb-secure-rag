@@ -1,0 +1,25 @@
+# Env Files
+.env
+.env.*
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Docker files
+*.log
+*.tmp
+*.swp
+*.DS_Store
+
+# IDE settings
+.idea/
+.vscode/
+
+# Sensitive data
+*.pem
+*.key
+
+# Data directories
+docs/

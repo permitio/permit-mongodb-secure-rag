@@ -1,0 +1,6 @@
+python-frontmatter
+watchdog
+python-dotenv
+pymongo
+PyYAML
+permit

@@ -1,0 +1,12 @@
+uvicorn
+fastapi
+langchain
+langchain-openai
+langchain-permit==0.1.4
+langchain_mongodb
+openai
+python-dotenv
+pymongo
+permit
+lark
+lark-parser

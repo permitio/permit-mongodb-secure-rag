@@ -1,0 +1,11 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY ./requirements.watcher.txt /app/requirements.watcher.txt
+
+RUN pip install --upgrade pip --no-cache-dir -r requirements.watcher.txt
+
+COPY ./watcher /app/watcher
+
+CMD ["python", "-m", "watcher.main"]
