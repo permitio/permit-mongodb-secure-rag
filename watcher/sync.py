@@ -2,11 +2,22 @@ import os
 import logging
 from typing import Dict, Any
 from pymongo import MongoClient
+import hashlib
 
 from watcher.utils import read_markdown_file, get_document_id, enrich_metadata
+from langchain_openai import OpenAIEmbeddings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+
+embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+
+
+def compute_content_hash(content: str) -> str:
+    """Generate a hash for the document content."""
+    return hashlib.md5(content.encode("utf-8")).hexdigest()
 
 
 class DocumentSyncer:
@@ -43,6 +54,19 @@ class DocumentSyncer:
             # Generate document ID
             document_id = get_document_id(file_path)
 
+            content_hash = compute_content_hash(content)
+
+            existing_doc = self.collection.find_one({"document_id": document_id})
+
+            should_embed = True
+            if existing_doc:
+                existing_hash = existing_doc.get("content_hash")
+                if existing_hash == content_hash:
+                    logger.info(
+                        f"Content unchanged for {document_id}, skipping embedding."
+                    )
+                    should_embed = False
+
             # Create document object (without vector_embedding)
             document = {
                 "document_id": document_id,
@@ -50,7 +74,15 @@ class DocumentSyncer:
                 "filepath": file_path,
                 "metadata": metadata,
                 "content": content,
+                "content_hash": content_hash,
             }
+
+            if should_embed:
+                vector_embedding = embeddings.embed_query(content)
+                document["vector_embedding"] = vector_embedding
+                logger.info(f"Generated new embedding for {document_id}")
+            else:
+                document["vector_embedding"] = existing_doc.get("vector_embedding")
 
             # Upsert document to MongoDB
             result = self.collection.update_one(
