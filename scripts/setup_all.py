@@ -1,9 +1,16 @@
-# setup_all.py
 import asyncio
 import logging
-from setup_rebac import setup_rebac_structure
-from setup_departments import create_department_instances
-from setup_users import assign_users_to_departments
+
+# from setup_rebac import setup_rebac_structure
+# from setup_departments import create_department_instances
+# from setup_users import assign_users_to_departments
+# from sync_documents import sync_all_documents
+
+from scripts.setup_rebac import setup_rebac_structure
+from scripts.setup_departments import create_department_instances
+from scripts.setup_users import assign_users_to_departments
+from scripts.sync_documents import sync_all_documents
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,6 +29,9 @@ async def setup_all():
 
         # Step 3: Assign users to departments
         await assign_users_to_departments()
+
+        # Step 4: Sync all documents to Permit
+        await sync_all_documents()
 
         logger.info("Complete ReBAC setup process finished successfully")
 

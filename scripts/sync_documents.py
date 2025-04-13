@@ -4,6 +4,12 @@ import logging
 import frontmatter
 import hashlib
 from permit import Permit
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from utils.document_ids import generate_document_id
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -11,6 +17,7 @@ logger = logging.getLogger(__name__)
 # Configuration
 PERMIT_PDP_URL = os.environ.get("PERMIT_PDP_URL", "http://localhost:7000")
 PERMIT_API_KEY = os.environ.get("PERMIT_API_KEY")
+
 
 # Initialize Permit client
 permit_client = Permit(token=PERMIT_API_KEY, pdp=PERMIT_PDP_URL)
@@ -113,16 +120,23 @@ async def sync_to_permit_rebac(document_id, metadata):
 async def sync_document(file_path):
     """Sync a document to Permit."""
     try:
-        logger.info(f"Syncing document to Permit: {file_path}")
+        # Normalize file_path to match Docker container's path format for document_id generation
+        normalized_path = file_path
+        if not normalized_path.startswith("/app/"):
+            # Remove './' if present and prepend '/app/'
+            normalized_path = normalized_path.lstrip("./")
+            normalized_path = f"/app/{normalized_path}"
 
-        # Read markdown file
+        logger.info(f"Syncing document to Permit: {normalized_path}")
+
+        # Read markdown file using the original file_path (not normalized)
         metadata, content, file_name = read_markdown_file(file_path)
 
-        # Enrich metadata
-        metadata = enrich_metadata(metadata, file_path)
+        # Enrich metadata using the normalized path for consistency
+        metadata = enrich_metadata(metadata, normalized_path)
 
-        # Generate document ID
-        document_id = get_document_id(file_path)
+        # Generate document ID using the normalized path
+        document_id = generate_document_id(normalized_path)
 
         # Sync to Permit
         permit_success = await sync_to_permit_rebac(document_id, metadata)
@@ -136,10 +150,34 @@ async def sync_document(file_path):
         logger.error(f"Error syncing document {file_path}: {str(e)}")
 
 
+async def sync_all_documents():
+    """Sync all documents in the docs directory to Permit."""
+    docs_dir = "./docs"
+    file_count = 0
+    success_count = 0
+
+    logger.info(f"Starting to sync all documents from {docs_dir} to Permit.io")
+
+    for root, _, files in os.walk(docs_dir):
+        for file in files:
+            if file.endswith((".md", ".markdown")):
+                file_path = os.path.join(root, file)
+                file_count += 1
+
+                try:
+                    await sync_document(file_path)
+                    success_count += 1
+                except Exception as e:
+                    logger.error(f"Failed to sync {file_path}: {str(e)}")
+
+    logger.info(
+        f"Completed syncing documents to Permit. Processed: {file_count}, Successful: {success_count}"
+    )
+    return success_count > 0
+
+
 if __name__ == "__main__":
     if not PERMIT_API_KEY:
         logger.error("PERMIT_API_KEY environment variable is not set")
     else:
-        # Example usage: Replace with the path to a specific document
-        file_path = "./docs/engineering/api_design.md"
-        asyncio.run(sync_document(file_path))
+        asyncio.run(sync_all_documents())

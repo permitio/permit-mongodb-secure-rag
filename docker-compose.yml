@@ -23,6 +23,7 @@ services:
       - MONGODB_URI=${MONGODB_URI}
       - PERMIT_PDP_URL=http://permit-pdp:7000
       - PERMIT_API_KEY=${PERMIT_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
       - permit-pdp
     restart: unless-stopped
@@ -35,6 +36,40 @@ services:
           "python",
           "-c",
           "import os; exit(0 if os.path.exists('/app/sync_complete') else 1)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  permit-sync:
+    build:
+      context: .
+      dockerfile: Dockerfile.watcher
+    container_name: permit-sync
+    volumes:
+      - ./docs:/app/docs
+      - ./scripts:/app/scripts
+      - ./utils:/app/utils
+      - ./permit_sync_entrypoint.py:/app/permit_sync_entrypoint.py
+    environment:
+      - PERMIT_PDP_URL=http://permit-pdp:7000
+      - PERMIT_API_KEY=${PERMIT_API_KEY}
+    depends_on:
+      file-watcher:
+        condition: service_healthy
+      permit-pdp:
+        condition: service_started
+    command: python /app/permit_sync_entrypoint.py
+    restart: no
+    networks:
+      - secure-rag-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import os; exit(0 if os.path.exists('/app/permit_sync_complete') else 1)",
         ]
       interval: 5s
       timeout: 5s
@@ -58,6 +93,8 @@ services:
     depends_on:
       file-watcher:
         condition: service_healthy
+      permit-sync:
+        condition: service_completed_successfully
     restart: unless-stopped
     networks:
       - secure-rag-network

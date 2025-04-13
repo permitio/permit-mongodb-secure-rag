@@ -3,6 +3,9 @@ import time
 import logging
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
+import hashlib
+from utils.document_ids import generate_document_id
+from watcher.utils import read_markdown_file
 
 from watcher.sync import DocumentSyncer
 
@@ -44,6 +47,21 @@ def sync_existing_documents(syncer: DocumentSyncer, docs_dir: str):
                 file_path = os.path.join(root, file)
                 logger.info(f"Processing file: {file_path}")
                 file_count += 1
+
+                # Read the file to compute content hash
+                metadata, content, _ = read_markdown_file(file_path)
+                content_hash = hashlib.md5(content.encode()).hexdigest()
+
+                # Generate document_id
+                document_id = generate_document_id(file_path)
+
+                # Check if document exists with same content hash
+                existing_doc = syncer.collection.find_one({"document_id": document_id})
+                if existing_doc and existing_doc.get("content_hash") == content_hash:
+                    logger.info(f"Document {document_id} unchanged, skipping sync")
+                    continue
+
+                # Sync the document if it’s new or changed
                 syncer.sync_document(file_path, is_new=True)
 
     logger.info(f"Found {file_count} markdown files to process")

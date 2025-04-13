@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Environment variables
-PERMIT_API_KEY = os.getenv("PERMIT_API_KEY")
+PERMIT_API_KEY = os.environ.get("PERMIT_API_KEY")
 PERMIT_PDP_URL = os.getenv("PERMIT_PDP_URL", "http://permit-pdp:7000")
 
 
@@ -37,14 +37,19 @@ async def setup_rebac_structure():
                 "actions": {"view": {"description": "View department details"}},
             }
         )
+        logger.info("✅ Resource types created successfully.")
 
         # Create resource relations
         logger.info("Creating resource relations...")
 
         await permit_client.api.resource_relations.create(
-            "department",
-            {"key": "parent", "name": "Parent", "subject_resource": "document"},
+            "document",
+            {"key": "parent", "name": "Parent", "subject_resource": "department"},
         )
+
+        logger.info("✅ Resource relations created successfully.")
+
+        await asyncio.sleep(10)
 
         # Create roles
         logger.info("Creating resource roles...")
@@ -57,22 +62,25 @@ async def setup_rebac_structure():
             "document", {"key": "reader", "name": "Reader", "permissions": ["read"]}
         )
 
-        # # Setup role derivation
-        # logger.info("Setting up role derivations...")
+        logger.info("✅ Resource roles created successfully.")
+        # Setup role derivation
+        logger.info("Setting up role derivations...")
 
-        # derivation_rule = {
-        #     "role": "member",
-        #     "on_resource": "department",
-        #     "linked_by_relation": "parent",
-        # }
+        derivation_rule = {
+            "role": "member",
+            "on_resource": "department",
+            "linked_by_relation": "parent",
+        }
 
-        # await permit_client.api.resource_roles.create_role_derivation(
-        #     resource_key="document",  # The resource type that has the role being derived
-        #     role_key="reader",  # The role being derived
-        #     derivation_rule=derivation_rule,
-        # )
+        await permit_client.api.resource_roles.create_role_derivation(
+            resource_key="document",
+            role_key="reader",
+            derivation_rule=derivation_rule,
+        )
 
-        logger.info("ReBAC structure setup completed successfully")
+        logger.info("✅ Role derivation setup completed.")
+
+        logger.info("🎉 ReBAC structure setup completed successfully")
 
     except Exception as e:
         logger.error(f"Error setting up ReBAC structure: {str(e)}")

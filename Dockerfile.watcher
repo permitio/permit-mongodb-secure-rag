@@ -2,10 +2,18 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    python3-dev \
+    libmagic-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY ./requirements.watcher.txt /app/requirements.watcher.txt
 
-RUN pip install --upgrade pip --no-cache-dir -r requirements.watcher.txt
+RUN pip install --upgrade pip wheel setuptools --no-cache-dir
+RUN pip install --no-cache-dir -r requirements.watcher.txt
 
 COPY ./watcher /app/watcher
+COPY ./utils /app/utils
 
 CMD ["python", "-m", "watcher.main"]

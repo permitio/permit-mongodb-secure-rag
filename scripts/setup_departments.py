@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Environment variables
-PERMIT_API_KEY = os.getenv("PERMIT_API_KEY")
+PERMIT_API_KEY = os.environ.get("PERMIT_API_KEY")
 PERMIT_PDP_URL = os.getenv("PERMIT_PDP_URL", "http://permit-pdp:7000")
 
 # Department definitions

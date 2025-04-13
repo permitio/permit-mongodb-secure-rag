@@ -138,6 +138,8 @@ async def query(request: QueryRequest):
             enable_limit=True,
         )
 
+        vector_store._current_retriever = retriever
+
         rag_chain = create_rag_chain(retriever)
 
         answer = await rag_chain.ainvoke(request.query)
@@ -223,6 +225,52 @@ async def delete_documents_collection():
         raise HTTPException(
             status_code=500, detail=f"Error deleting collection: {str(e)}"
         )
+
+
+@app.post("/test-query")
+async def test_query(request: QueryRequest):
+    """A simplified test endpoint for debugging."""
+    try:
+        user = {"key": request.user_id}
+
+        # Create a simple retriever with only document_id filtering
+        retriever = await PermitSelfQueryRetriever.from_permit_client(
+            permit_client=permit_client,
+            user=user,
+            resource_type="document",
+            action="read",
+            llm=llm,
+            vectorstore=vector_store,
+            enable_limit=True,
+        )
+
+        # Manually create a simple query with just the document_id filter
+        query_kwargs = {
+            "pre_filter": {"document_id": {"$in": retriever._allowed_ids}},
+            "k": 4,
+        }
+
+        # Directly perform the vector search with the simplified filter
+        docs = await vector_store.asimilarity_search_with_relevance_scores(
+            request.query, **query_kwargs
+        )
+
+        doc_check = list(
+            collection.find({"document_id": {"$in": retriever._allowed_ids}})
+        )
+
+        # Check if docs have valid embeddings
+        docs_with_embeddings = list(
+            collection.find(
+                {
+                    "document_id": {"$in": retriever._allowed_ids},
+                    "vector_embedding": {"$exists": True},
+                }
+            )
+        )
+        return {"status": "success", "docs_found": len(docs)}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 if __name__ == "__main__":
