@@ -4,7 +4,7 @@
 
 ## Quickstart: 2-Min Plug & Play
 
-### ✅ Requirements:
+### Requirements:
 
 - [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) cluster (Free Tier is fine)
 - [Permit.io account](https://www.permit.io/) (Free Tier is fine)
@@ -12,7 +12,7 @@
 - Docker & Docker Compose installed on your machine
 - Python 3.11+ (recommended for running manual scripts, e.g., setup_users.py)
 
-> You can check your version with python3 --version or install Python from python.org
+> You can check your version with `python3 --version` or install Python from [Python Official Website](https://www.python.org/)
 
 ### 1. Set Up Vector Search in MongoDB Atlas
 
@@ -49,7 +49,7 @@
 - Click Save. Let the index finish building before continuing.
 - You're done with MongoDB Vector Search setup!
 
-> 📘 [Learn more about vector search indexing](https://www.mongodb.com/docs/atlas/atlas-search/vector-search/)
+> [Learn more about vector search indexing](https://www.mongodb.com/docs/atlas/atlas-search/vector-search/)
 
 ### 2. Clone the Project Repository & Add Your .env File
 
@@ -106,7 +106,7 @@ Try querying with:
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 - `docs/` → Markdown documents grouped by department
 - `watcher/` → Syncs docs to MongoDB + triggers embeddings generation for each document
@@ -116,7 +116,7 @@ Try querying with:
 
 ---
 
-## 🧠 How Permissions Work
+## How Permissions Work
 
 - Each markdown file contains frontmatter metadata (e.g. department, confidential)
 - This metadata is synced to Permit.io as resource instances
@@ -126,7 +126,7 @@ Try querying with:
 
 ---
 
-## 🛠️ Want Full Control? [See `MANUAL_SETUP.md`](./MANUAL_SETUP.md)
+## Want Full Control? [See `MANUAL_SETUP.md`](./MANUAL_SETUP.md)
 
 If you want to:
 
