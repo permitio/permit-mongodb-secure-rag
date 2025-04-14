@@ -2,7 +2,22 @@
 
 This project demonstrates a Secure Retrieval-Augmented Generation (RAG) system using MongoDB, Permit.io, and LangChain. It provides a secure AI agent that retrieves and generates responses based on user identity and permissions, ensuring agents can only access the data authorized for the users that instruct them.
 
-## Quickstart: 2-Min Plug & Play
+## Table of Contents
+
+- [Quickstart](#quickstart)
+- [In-Depth Project Overview](#in-depth-project-overview)
+  - [Architecture Diagram](#architecture-diagram)
+  - [Prerequisites](#prerequisites)
+  - [Setup Instructions](#setup-instructions)
+    - [MongoDB Atlas Setup](#mongodb-atlas-setup)
+    - [Permit.io Setup (Manual Configuration)](#permitio-setup)
+    - [Environment Variables](#environment-variables)
+  - [Running the Project](#running-the-project)
+  - [ReBAC Policy Demo in Permit.io](#rebac-policy-demo-in-permitio)
+  - [How Permissions Enable Secure RAG](#how-permissions-enable-secure-rag)
+  - [Contributing](#contributing)
+
+# Quickstart
 
 ### Requirements:
 
@@ -124,36 +139,11 @@ Try querying with:
 - MongoDB vector search filters based on permitted IDs only
 - Final response is generated using OpenAI from **only** allowed docs
 
----
 
-## Want Full Control? [See `MANUAL_SETUP.md`](./MANUAL_SETUP.md)
-
-If you want to:
-
-- Define policies manually in the UI
-- Customize user/dept/resource mappings
-- Manage ReBAC setup yourself
-
-Use the manual route instead.
 
 ---
 
-## Table of Contents
-
-- [Project Overview](#project-overview)
-- [Architecture Diagram](#architecture-diagram)
-- [Prerequisites](#prerequisites)
-- [Setup Instructions](#setup-instructions)
-  - [MongoDB Atlas Setup](#mongodb-atlas-setup)
-  - [Permit.io Setup (Manual Configuration)](#permitio-setup-manual-configuration)
-  - [Environment Variables](#environment-variables)
-- [Running the Project](#running-the-project)
-- [ReBAC Policy Demo in Permit.io](#rebac-policy-demo-in-permitio)
-- [How Permissions Enable Secure RAG](#how-permissions-enable-secure-rag)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Project Overview
+# In-Depth Project Overview
 
 Secure RAG combines Retrieval-Augmented Generation with Role-Based Access Control (ReBAC) to ensure that an AI agent only retrieves and generates responses from data a user is authorized to access. This project integrates:
 
