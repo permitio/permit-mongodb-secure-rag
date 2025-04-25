@@ -1,6 +1,6 @@
 # Secure RAG Demo with MongoDB, Permit.io & LangChain
 
-This project demonstrates a Secure Retrieval-Augmented Generation (RAG) system using MongoDB, Permit.io, and LangChain. It provides a secure AI agent that retrieves and generates responses based on user identity and permissions, ensuring agents can only access the data authorized for the users that instruct them.
+This project demonstrates how to set up a Secure Retrieval-Augmented Generation (RAG) system using MongoDB, Permit.io, and LangChain. It provides a secure AI agent that retrieves and generates responses based on user identity and permissions, ensuring agents can only access the data authorized for the users that instruct them.
 
 ## Table of Contents
 
@@ -75,7 +75,7 @@ git clone https://github.com/permitio/permit-mongodb-secure-rag.git
 cd permit-mongodb-secure-rag
 ```
 
-Create a `.env` file in the root of the project and add your credentials::
+Create a `.env` file in the root of the project and add your credentials:
 
 ```
 MONGODB_URI=<your-mongodb-uri>
@@ -133,13 +133,11 @@ Try querying with:
 
 ## How Permissions Work
 
-- Each markdown file contains frontmatter metadata (e.g. department, confidential)
+- Each markdown file contains frontmatter metadata (e.g., department, confidential)
 - This metadata is synced to Permit.io as resource instances
 - When a user makes a query, LangChain asks Permit.io which documents they can access
 - MongoDB vector search filters based on permitted IDs only
 - Final response is generated using OpenAI from **only** allowed docs
-
-
 
 ---
 
@@ -293,7 +291,7 @@ To enable authorization in our RAG, we have to configure policy rules in Permit.
    **Steps**:
 
    - Click "Create Resource Instance".
-   - Set key to `engineering`, tenant to `default`, and add the attribute `name: "Engineering Department"`.
+   - Set the key to `engineering`, the tenant to `default`, and add the attribute name: "Engineering Department".
    - Repeat for `marketing` and `finance`.
 
 4. **Create Users**:
@@ -306,7 +304,7 @@ To enable authorization in our RAG, we have to configure policy rules in Permit.
    **Steps**:
 
    - Click "Create User".
-   - Set key to `alice`, email to alice@example.com.
+   - Set the key to `alice`, and the email to alice@example.com.
    - Repeat for `bob`.
 
 5. **Assign Roles to Users**:
@@ -326,7 +324,7 @@ To enable authorization in our RAG, we have to configure policy rules in Permit.
 
    - Go to "Policy Editor".
    - Add a role derivation to inherit permissions:
-     - If a user has the `viewer` role in `department:X`, they inherit `document:read` for documents where department is the parent of the document.
+     - If a user has the `viewer` role in `department:X`, they inherit `document:read` for documents where the department is the parent of the document.
 
    **Steps**:
 
@@ -387,14 +385,14 @@ If you prefer to automate the setup of resources, roles, departments, users, and
      - Role: `viewer`
      - Condition: User has role `viewer` in `department` AND `department` is `parent` of `document`.
    - **Explanation**:
-     - This derivation ensures that a user with the `viewer` role in a department (e.g., `department:engineering`) can read documents where that department is the `parent`.
+     - This derivation ensures that a user with the `viewer` role in a department (e.g., `department:engineering`) can read documents where that department is the parent.
 
 5. **Verify Setup**:
    - In the Permit.io UI, check:
      - "Resources" > "department" for department instances.
      - "Resources" > "document" for document instances (after syncing documents).
      - "Users" for `alice` and `bob` with their role assignments.
-     - "Policy Editor" for the role derivation.
+     - "Policy Editor" for role derivation.
 
 ### Environment Variables
 
@@ -424,7 +422,7 @@ PERMIT_PDP_URL=http://permit-pdp:7000
    - **For Dockerized Services (LangChain App and File-Watcher)**:
      - Dependencies are automatically installed when you build the Docker containers using `docker-compose up --build`. The `Dockerfile` and `Dockerfile.watcher` handle installing `requirements.txt` and `requirements.watcher.txt`, respectively.
    - **For Manual Scripts (Embedding Generation and Permit.io Syncing)**:
-     - To run any of the script in the `scripts` folder, install their dependencies manually:
+     - To run any of the scripts in the `scripts` folder, install their dependencies manually:
        ```bash
        pip install -r requirements.embeddings.txt
        pip install -r requirements.txt
@@ -484,36 +482,36 @@ Here's a simple ReBAC policy configured in Permit.io:
 
 ### Resources:
 
-- **department**: Represents departments (e.g., department:engineering).
-- **document**: Represents documents (e.g., document:api_design_3d08a90b).
+- **department**: Represents departments (e.g., `department:engineering`).
+- **document**: Represents documents (e.g., `document:api_design_3d08a90b`).
 
 ### Roles:
 
-- **viewer**: Has document:read permission.
+- **viewer**: Has `document:read` permission.
 
 ### Relationships:
 
-- department:engineering is parent of document:api_design_3d08a90b.
+- `department:engineering` is the parent of `document:api_design_3d08a90b`.
 
 ### Role Derivation:
 
-- A user with the viewer role in department:engineering inherits document:read for all documents where department:engineering is the parent.
+- A user with the viewer role in `department:engineering` inherits `document:read` for all documents where `department:engineering` is the parent.
 
 ### Example
 
-- **Document**: document:api_design_3d08a90b (attributes: department: "engineering")
-- **User**: alice (role: viewer in department:engineering)
+- **Document**: `document:api_design_3d08a90b` (attributes: `department:"engineering"`)
+- **User**: alice (role: viewer in `department:engineering`)
 
 #### Policy Result:
 
-- alice can read document:api_design_3d08a90b because she has the viewer role in department:engineering, and department:engineering is the parent of the document.
-- bob (role: viewer in department:marketing) cannot read this document.
+- alice can read `document:api_design_3d08a90b` because she has the viewer role in `department:engineering`, and `department:engineering` is the parent of the document.
+- bob (role: viewer in `department:marketing`) cannot read this document.
 
 ## How Permissions Enable Secure RAG
 
 ### User Identity:
 
-- The API receives a user_id (e.g., alice) in the query request.
+- The API receives a `user_id` (e.g., alice) in the query request.
 
 ### Permission Check:
 
@@ -523,7 +521,7 @@ Here's a simple ReBAC policy configured in Permit.io:
 ### Filtered Retrieval:
 
 - LangChain queries MongoDB Atlas, filtering by the permitted document IDs and the user's query (e.g., "What is API design?").
-- MongoDB performs a vector search on the vector_embedding field to retrieve relevant documents.
+- MongoDB performs a vector search on the `vector_embedding` field to retrieve relevant documents.
 
 ### Answer Generation:
 
