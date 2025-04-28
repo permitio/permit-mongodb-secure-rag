@@ -1,6 +1,6 @@
-# Secure RAG Demo with MongoDB, Permit.io & LangChain
+# Secure RAG Demo with MongoDB, [Permit.io](https://www.permit.io/ai-access-control) & LangChain
 
-This project demonstrates how to set up a Secure Retrieval-Augmented Generation (RAG) system using MongoDB, Permit.io, and LangChain. It provides a secure AI agent that retrieves and generates responses based on user identity and permissions, ensuring agents can only access the data authorized for the users that instruct them.
+This project demonstrates how to set up a Secure Retrieval-Augmented Generation ([RAG](https://www.permit.io/tags/rag)) system using MongoDB, Permit.io, and [LangChain](https://github.com/permitio/langchain-permit). It provides a secure AI agent that retrieves and generates responses based on user identity and permissions, ensuring agents can only access the data authorized for the users that instruct them.
 
 ## Table of Contents
 
@@ -22,7 +22,7 @@ This project demonstrates how to set up a Secure Retrieval-Augmented Generation 
 ### Requirements:
 
 - [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) cluster (Free Tier is fine)
-- [Permit.io account](https://www.permit.io/) (Free Tier is fine)
+- [Permit.io account](https://app.permit.io/) (Free Tier is fine)
 - [OpenAI API Key](https://platform.openai.com/account/api-keys)
 - Docker & Docker Compose installed on your machine
 - Python 3.11+ (recommended for running manual scripts, e.g., setup_users.py)
