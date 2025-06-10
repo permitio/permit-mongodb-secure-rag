@@ -128,6 +128,16 @@ async def query(request: QueryRequest):
             "key": request.user_id,
         }
 
+        # First check if user exists in Permit
+        try:
+            user_permissions = await permit_client.get_user_permissions(
+                user=user, resource_types=["document"]
+            )
+            user_exists = True
+        except Exception as e:
+            logger.warning(f"User {request.user_id} not found in Permit: {str(e)}")
+            user_exists = False
+
         retriever = await PermitSelfQueryRetriever.from_permit_client(
             permit_client=permit_client,
             user=user,
@@ -137,6 +147,27 @@ async def query(request: QueryRequest):
             vectorstore=vector_store,
             enable_limit=True,
         )
+
+        # Check if user has permission to access any documents
+        allowed_ids = (
+            retriever._allowed_ids if hasattr(retriever, "_allowed_ids") else []
+        )
+
+        if not allowed_ids:
+            if not user_exists:
+                logger.warning(
+                    f"User {request.user_id} does not exist in authorization system"
+                )
+                return {
+                    "answer": "You are not authorized to access this resource.",
+                    "sources": [],
+                }
+            else:
+                logger.warning(f"User {request.user_id} has no document permissions")
+                return {
+                    "answer": "No documents match your query due to permission restrictions.",
+                    "sources": [],
+                }
 
         vector_store._current_retriever = retriever
 
@@ -148,9 +179,6 @@ async def query(request: QueryRequest):
 
         # Check if the LLM returned the default message due to irrelevant documents
         if answer.strip() == "I don't have enough information to answer this question.":
-            allowed_ids = (
-                retriever._allowed_ids if hasattr(retriever, "_allowed_ids") else []
-            )
             answer = f"No documents match your query due to permission restrictions. You only have access to documents: {allowed_ids}."
             logger.warning(
                 "Retrieved documents are irrelevant to the query due to permissions"
